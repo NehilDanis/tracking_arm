@@ -1,5 +1,6 @@
 # tracking_arm
 Implements the tracking of an arm during ultrasound scanning, using the Azure Kinect Depth Sensor
+Arm segmentation is done using unet with vgg16 backbone.
 
 # Requirements 
 ```
