@@ -32,7 +32,7 @@ class SegmentArm(object):
 
         img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
 
-        cv2.imshow("img", img)
+        cv2.imshow("original_img", img)
         cv2.waitKey(1)
         img = cv2.resize(img, (512, 512)).transpose(2, 0, 1).reshape(1, 3, 512, 512)
         #print(img.shape)
@@ -50,8 +50,6 @@ class SegmentArm(object):
         #cv2.bitwise_and(img, img, mask = mask)
         img[mask==1] = 255
         img[mask==0] = 0
-
-        print(img)
 
 
         cv2.imshow("mask", img)
