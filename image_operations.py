@@ -274,6 +274,7 @@ def augment_data(img, mask, idx, folder_name):
 
     return idx
 
+
 def create_mask(im_folder_name, anotations_folder, mask_folder):
     entries = os.listdir(anotations_folder)
     file_id = 1
@@ -305,16 +306,16 @@ def create_mask(im_folder_name, anotations_folder, mask_folder):
 
             if file_id % 5 == 0:
                 # validation set
-                idx_arm = augment_data(img, dst_arm, idx_arm, "/home/nehil/arm_data_folder/validation_set")
+                idx_arm = augment_data(img, dst_arm, idx_arm, "/home/nehil/new_arm_data_folder/Test")
                 idx_arm_w_tarso = augment_data(img, dst_arm_w_tarso, idx_arm_w_tarso,
-                                               "/home/nehil/arm_w_tarso_data_folder/validation_set")
+                                               "/home/nehil/new_arm_w_tarso_data_folder/Test")
             else:
                 #train set
-                idx_arm = augment_data(img, dst_arm, idx_arm, "/home/nehil/arm_data_folder/train_set")
-                idx_arm_w_tarso = augment_data(img, dst_arm_w_tarso, idx_arm_w_tarso, "/home/nehil/arm_w_tarso_data_folder/train_set")
+                idx_arm = augment_data(img, dst_arm, idx_arm, "/home/nehil/new_arm_data_folder/Train")
+                idx_arm_w_tarso = augment_data(img, dst_arm_w_tarso, idx_arm_w_tarso, "/home/nehil/new_arm_w_tarso_data_folder/Train")
             file_id += 1
 
 
 if __name__ == "__main__":
     # change_file_names("/var/www/html/LabelMeAnnotationTool/Images/example_folder")
-    create_mask("/var/www/html/LabelMeAnnotationTool/Images/example_folder", "/var/www/html/LabelMeAnnotationTool/Annotations/example_folder", "/var/www/html/LabelMeAnnotationTool/Masks/example_folder")
+    create_mask("/home/nehil/images_arm", "/home/nehil/annotations", "/var/www/html/LabelMeAnnotationTool/Masks/result_masks")
