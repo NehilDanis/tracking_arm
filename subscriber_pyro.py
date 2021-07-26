@@ -2,6 +2,7 @@ import torch
 import Pyro5
 import Pyro5.api
 
+from custom_segmentation import createDeepLabv3
 import numpy as np
 import cv2
 
@@ -20,12 +21,14 @@ class SegmentArm(object):
         # create the model using the given model_path
         # Load the trained model
         self.model = torch.load('/home/nehil/arm_w_tarso_data_folder/weights_vgg16.pt')
-        # Set the model to evaluate mode
+        # Set the model to evaluate model
+
         self.model.eval()
 
     def segment_arm(self, img):
 
         img = img[:, :, :3]
+        orig_shape = (img.shape[1], img.shape[0])
         print("start arm segmentation")
         # the image coming from the camera is BGR --> make it RGB
         # change the size to (1, 3, 512, 512)
@@ -51,11 +54,20 @@ class SegmentArm(object):
         img[mask==1] = 255
         img[mask==0] = 0
 
+        img = cv2.resize(img, orig_shape, cv2.INTER_NEAREST)
 
-        cv2.imshow("mask", img)
-        cv2.waitKey(1)
+        largest_contour_mask = np.zeros(img.shape, np.uint8)
 
-        return img
+        fc = cv2.findContours(img, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
+        contours = fc[0]
+        largest_contour = max(contours, key=cv2.contourArea)
+
+        cv2.drawContours(largest_contour_mask, [largest_contour], -1, (255,255,255), -1)
+
+        #cv2.imshow("mask", largest_contour_mask)
+        #cv2.waitKey(1)
+
+        return largest_contour_mask
 
 
 if __name__ == '__main__':
