@@ -7,13 +7,13 @@ from PIL import Image
 
 
 # Load the trained model
-model = torch.load('/home/nehil/arm_w_tarso_data_folder/weights_vgg16.pt')
+model = torch.load('/home/nehil/new_arm_w_tarso_data_folder/weights_vgg16_2.pt')
 # Set the model to evaluate mode
 model.eval()
 
 
 # Read the log file using pandas into a dataframe
-df = pd.read_csv('/home/nehil/arm_w_tarso_data_folder/log_vgg16.csv')
+df = pd.read_csv('/home/nehil/new_arm_w_tarso_data_folder/log_vgg16.csv')
 
 # Plot all the values with respect to the epochs
 #df.plot(x='epoch',figsize=(15,8));
@@ -26,7 +26,7 @@ df = pd.read_csv('/home/nehil/arm_w_tarso_data_folder/log_vgg16.csv')
 # Read  a sample image and mask from the data-set
 
 transform = transforms.Compose([transforms.Resize((512,512)), transforms.ToTensor()])
-img = cv2.imread(f'/home/nehil/train_set_2/img_71.jpg')
+img = cv2.imread(f'/home/nehil/images_arm/img276.jpg')
 
 img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
 img = cv2.resize(img, (512, 512)).transpose(2,0,1).reshape(1,3,512,512)

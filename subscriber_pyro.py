@@ -2,13 +2,11 @@ import torch
 import Pyro5
 import Pyro5.api
 
-from custom_segmentation import createDeepLabv3
 import numpy as np
 import cv2
 
+import time
 
-
-import msgpack
 import msgpack_numpy as m
 m.patch()
 Pyro5.config.SERIALIZER = "msgpack"
@@ -18,9 +16,12 @@ Pyro5.config.SERVERTYPE = "multiplex"
 @Pyro5.server.behavior(instance_mode="single")
 class SegmentArm(object):
     def __init__(self):
+        self.sum = 0
+        self.idx = 0
         # create the model using the given model_path
         # Load the trained model
-        self.model = torch.load('/home/nehil/arm_w_tarso_data_folder/weights_vgg16.pt')
+        #self.model = torch.load('/home/nehil/arm_w_tarso_data_folder/weights_vgg16.pt')
+        self.model = torch.load('/home/nehil/new_arm_w_tarso_data_folder/weights_vgg16_2.pt')
         # Set the model to evaluate model
 
         self.model.eval()
@@ -29,23 +30,27 @@ class SegmentArm(object):
 
         img = img[:, :, :3]
         orig_shape = (img.shape[1], img.shape[0])
-        print("start arm segmentation")
+        # print("start arm segmentation")
         # the image coming from the camera is BGR --> make it RGB
         # change the size to (1, 3, 512, 512)
 
-        img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-
-        cv2.imshow("original_img", img)
+        temp_img = cv2.resize(img, (int(img.shape[1] / 3), int(img.shape[0] / 3)))
+        cv2.imshow("original_img", temp_img)
         cv2.waitKey(1)
+        img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
         img = cv2.resize(img, (512, 512)).transpose(2, 0, 1).reshape(1, 3, 512, 512)
         #print(img.shape)
 
-
+        start_seg = time.time()
         with torch.no_grad():
             a = self.model(torch.from_numpy(img).type(torch.cuda.FloatTensor) / 255)
+        end_seg = time.time()
 
+        start_detach_tim = time.time()
         mask = np.array(a.cpu().detach().numpy()[0][0]>0.2) * 1
+        end_detach_tim = time.time()
 
+        #print(end_detach_tim - start_detach_tim)
 
         img = img.reshape(512, 512, 3)
         img = cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)
@@ -64,8 +69,16 @@ class SegmentArm(object):
 
         cv2.drawContours(largest_contour_mask, [largest_contour], -1, (255,255,255), -1)
 
-        #cv2.imshow("mask", largest_contour_mask)
-        #cv2.waitKey(1)
+        #print(f"Segmentation takes : {end_seg - start_seg}")
+        # if self.idx < 500:
+        #     self.sum += end_seg - start_seg
+        #     self.idx += 1
+        # elif self.idx == 500:
+        #     print(f"Avg seg time: {self.sum / self.idx}")
+
+        temp_mask = cv2.resize(largest_contour_mask, (int(largest_contour_mask.shape[1] / 3), int(largest_contour_mask.shape[0] / 3)))
+        cv2.imshow("mask", temp_mask)
+        cv2.waitKey(1)
 
         return largest_contour_mask
 

@@ -252,7 +252,7 @@ def augment_data(img, mask, idx, folder_name):
 
     idx += 1
 
-    # 11 ) random flip + change of saturation
+    # 12 ) random flip + change of saturation
 
     img_file = 'img' + str(idx) + ".jpg"
     mask_file = 'mask' + str(idx) + ".jpg"

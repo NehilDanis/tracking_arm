@@ -12,10 +12,12 @@ def train_model(model, criterion, dataloaders, optimizer, metrics, bpath,
                 num_epochs):
     since = time.time()
     best_model_wts = copy.deepcopy(model.state_dict())
+    model_tmp = copy.deepcopy(model)
     best_loss = 1e10
     # Use gpu if available
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     model.to(device)
+    model_tmp.to(device)
     # Initialize the log file for training and testing loss and metrics
     fieldnames = ['epoch', 'Train_loss', 'Test_loss'] + \
         [f'Train_{m}' for m in metrics.keys()] + \
@@ -34,8 +36,10 @@ def train_model(model, criterion, dataloaders, optimizer, metrics, bpath,
         for phase in ['Train', 'Test']:
             if phase == 'Train':
                 model.train()  # Set model to training mode
+                model_tmp.train()
             else:
                 model.eval()  # Set model to evaluate mode
+                model_tmp.eval()
 
             # Iterate over data.
             for sample in tqdm(iter(dataloaders[phase])):
@@ -48,6 +52,13 @@ def train_model(model, criterion, dataloaders, optimizer, metrics, bpath,
                 with torch.set_grad_enabled(phase == 'Train'):
                     outputs = model(inputs)
 
+                    # do min max normalization to your output, so that it will it to the BCE loss --> the pred
+                    # input needs to be between 0 and 1.
+                    # min = torch.min(outputs)
+                    # max = torch.max(outputs)
+                    # outputs = (outputs - min) / (max - min)
+
+                    # calculate loss
                     loss = criterion(outputs, masks)
                     y_pred = outputs.data.cpu().numpy().ravel()
                     y_true = masks.data.cpu().numpy().ravel()
@@ -78,6 +89,9 @@ def train_model(model, criterion, dataloaders, optimizer, metrics, bpath,
             if phase == 'Test' and loss < best_loss:
                 best_loss = loss
                 best_model_wts = copy.deepcopy(model.state_dict())
+                model_tmp.load_state_dict(best_model_wts)
+                # Save the trained model
+                torch.save(model_tmp, bpath / f'weights_epoch{epoch}.pt')
 
     time_elapsed = time.time() - since
     print('Training complete in {:.0f}m {:.0f}s'.format(

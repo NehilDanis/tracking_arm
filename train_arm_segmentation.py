@@ -25,7 +25,7 @@ from custom_segmentation import train_model
               default=4,
               type=int,
               help="Specify the batch size for the dataloader.")'''
-def main(data_directory = '/home/nehil/arm_w_tarso_data_folder', exp_directory = '/home/nehil/arm_w_tarso_data_folder', epochs = 10, batch_size = 4):
+def main(data_directory = '/home/nehil/new_arm_w_tarso_data_folder', exp_directory = '/home/nehil/new_arm_w_tarso_data_folder', epochs = 10, batch_size = 4):
     # Create the deeplabv3 resnet101 model which is pretrained on a subset
     # of COCO train2017, on the 20 categories that are present in the Pascal VOC dataset.
     model = createDeepLabv3()
@@ -38,6 +38,7 @@ def main(data_directory = '/home/nehil/arm_w_tarso_data_folder', exp_directory =
 
     # Specify the loss function
     criterion = torch.nn.MSELoss(reduction='mean')
+    #criterion = torch.nn.BCELoss(reduction='mean')
     # Specify the optimizer with a lower learning rate
     optimizer = torch.optim.Adam(model.parameters(), lr=1e-4)
 
@@ -56,7 +57,7 @@ def main(data_directory = '/home/nehil/arm_w_tarso_data_folder', exp_directory =
                     num_epochs=epochs)
 
     # Save the trained model
-    torch.save(model, exp_directory / 'weights_vgg16.pt')
+    torch.save(model, exp_directory / 'weights_vgg16_2.pt')
 
 
 if __name__ == "__main__":
